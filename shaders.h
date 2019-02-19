@@ -24,4 +24,9 @@ void imageFragShader(PIXEL & fragment, const Attributes & vertAttr, const Attrib
     fragment = (*myPointer)[y][x];
 }
 
+void gradientMaskShader(PIXEL & fragment, const Attributes & vertAttr, const Attributes & uniforms)
+{
+    BufferImage* myPointer = (BufferImage*)uniforms.pointerImg;
+}
+
 #endif

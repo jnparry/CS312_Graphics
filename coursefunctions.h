@@ -283,6 +283,63 @@ void TestDrawTriangle(Buffer2D<PIXEL> & target)
         DrawPrimitive(TRIANGLE, target, verts, attr);
 }
 
+/***********************************************
+ * Demonstrate Fragment Shader, linear VBO 
+ * interpolation for Project 03. 
+ **********************************************/
+void TestDrawGradient(Buffer2D<PIXEL> & target)
+{
+        Vertex quad[] = {{10, 10, 1, 1}, {100, 10, 1, 1}, {100, 100, 1, 1}, {10, 100, 1, 1}};
+
+        Vertex verticesImgA[3];
+        Attributes imageAttributesA[3];
+        verticesImgA[0] = quad[0];
+        verticesImgA[1] = quad[1];
+        verticesImgA[2] = quad[2];
+
+        Vertex verticesImgB[3];        
+        Attributes imageAttributesB[3];
+        verticesImgB[0] = quad[2];
+        verticesImgB[1] = quad[3];
+        verticesImgB[2] = quad[0];
+
+        // ImageAttributes A
+        imageAttributesA[0].attrValues[0] = 0; // first point u
+        imageAttributesA[0].attrValues[1] = 0; // first point v
+        imageAttributesA[1].attrValues[0] = 1; // second point u
+        imageAttributesA[1].attrValues[1] = 0; // second point v
+        imageAttributesA[2].attrValues[0] = 1; // third point u
+        imageAttributesA[2].attrValues[1] = 1; // third point v
+
+        // ImageAttributes B
+        imageAttributesB[0].attrValues[0] = 1;
+        imageAttributesB[0].attrValues[1] = 1;
+        imageAttributesB[1].attrValues[0] = 0;
+        imageAttributesB[1].attrValues[1] = 1;
+        imageAttributesB[2].attrValues[0] = 0;
+        imageAttributesB[2].attrValues[1] = 0;
+
+        // Set numValues to 2 (UV coordinates)
+        imageAttributesA[0].numValues = 2;
+        imageAttributesA[1].numValues = 2;
+        imageAttributesA[2].numValues = 2;
+        imageAttributesB[0].numValues = 2;
+        imageAttributesB[1].numValues = 2;
+        imageAttributesB[2].numValues = 2;
+
+        BufferImage myImage("MarioTeam.bmp");
+        BufferImage myImage2("gradient.bmp");
+
+        Attributes imageUniforms;
+        imageUniforms.pointerImg = &myImage;
+        imageUniforms.pointerImg2 = &myImage2;
+
+        FragmentShader fragImg;
+        fragImg.FragShader = gradientMaskShader;
+
+        // Draw image triangle 
+        DrawPrimitive(TRIANGLE, target, verticesImgA, imageAttributesA, &imageUniforms, &fragImg);
+}
 
 /***********************************************
  * Demonstrate Fragment Shader, linear VBO 
