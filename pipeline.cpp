@@ -61,7 +61,9 @@ void processUserInputs(bool & running)
                 double mouseY = e.motion.yrel;
 
                 myCam.yaw -= mouseX * 0.02;
-                myCam.pitch += mouseY * 0.02;
+                myCam.pitch -= mouseY * 0.02;
+                // myCam.pitch += mouseY * 0.02;
+
             }
         }
 

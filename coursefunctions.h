@@ -165,16 +165,121 @@ void CADView(Buffer2D<PIXEL> & target)
         // Each CAD Quadrant
         static int halfWid = target.width()/2;
         static int halfHgt = target.height()/2;
-        static Buffer2D<PIXEL> topLeft(halfWid, halfHgt);
-        static Buffer2D<PIXEL> topRight(halfWid, halfHgt);
-        static Buffer2D<PIXEL> botLeft(halfWid, halfHgt);
-        static Buffer2D<PIXEL> botRight(halfWid, halfHgt);
-
+        static Buffer2D<PIXEL> topLeft (halfWid, halfHgt); // ortho
+        static Buffer2D<PIXEL> topRight(halfWid, halfHgt); // persp
+        static Buffer2D<PIXEL> botLeft (halfWid, halfHgt); // ortho
+        static Buffer2D<PIXEL> botRight(halfWid, halfHgt); // ortho
 
         // Your code goes here 
         // Feel free to copy from other test functions to get started!
 
+        topLeft.zeroOut();
+        botLeft.zeroOut();
+        topRight.zeroOut();
+        botRight.zeroOut();
 
+        Vertex cube[] = { 
+                // front plane
+                {-20, -20, 50, 1}, // bl
+                { 20, -20, 50, 1}, // br
+                { 20,  20, 50, 1}, // tl
+                {-20,  20, 50, 1}, // tr
+
+                // back plane
+                {-20, -20, 90, 1}, // bl
+                { 20, -20, 90, 1}, // br
+                { 20,  20, 90, 1}, // tl
+                {-20,  20, 90, 1}  // tr
+        };
+
+        Vertex quad[] = { {-20,-20, 50, 1}, // bl
+                          {20, -20, 50, 1}, // br
+                          {20, 20, 50, 1 }, // tl
+                          {-20,20, 50, 1}}; // tr
+
+        Vertex     verticesImgA[3];
+        Attributes imageAttributesA[3];
+        verticesImgA[0] = quad[0];
+        verticesImgA[1] = quad[1];
+        verticesImgA[2] = quad[2];
+
+        Vertex     verticesImgB[3];        
+        Attributes imageAttributesB[3];
+        verticesImgB[0] = quad[2];
+        verticesImgB[1] = quad[3];
+        verticesImgB[2] = quad[0];
+
+        double coordinates[4][2] = { {0,0}, {1,0}, {1,1}, {0,1} };
+        // Your texture coordinate code goes here for 'imageAttributesA, imageAttributesB'
+
+        // image attrs A
+        imageAttributesA[0].attrValues[0].d = coordinates[0][0];
+        imageAttributesA[0].attrValues[1].d = coordinates[0][1];
+        imageAttributesA[0].numValues = 2;
+
+        imageAttributesA[1].attrValues[0].d = coordinates[1][0];
+        imageAttributesA[1].attrValues[1].d = coordinates[1][1];
+        imageAttributesA[1].numValues = 2;
+
+        imageAttributesA[2].attrValues[0].d = coordinates[2][0];
+        imageAttributesA[2].attrValues[1].d = coordinates[2][1];
+        imageAttributesA[2].numValues = 2;
+
+        // image attrs B
+        imageAttributesB[0].attrValues[0].d = coordinates[2][0];
+        imageAttributesB[0].attrValues[1].d = coordinates[2][1];
+        imageAttributesB[0].numValues = 2;
+
+        imageAttributesB[1].attrValues[0].d = coordinates[3][0];
+        imageAttributesB[1].attrValues[1].d = coordinates[3][1];
+        imageAttributesB[1].numValues = 2;
+
+        imageAttributesB[2].attrValues[0].d = coordinates[0][0];
+        imageAttributesB[2].attrValues[1].d = coordinates[0][1];
+        imageAttributesB[2].numValues = 2;
+
+        static BufferImage myImage("rubiksred.bmp");
+        Attributes  imageUniforms;
+        Matrix      model;
+        
+        model.addTranslate(0, 0, 0);
+        Matrix viewTR = camera4x4(myCam.x, myCam.y, myCam.z, myCam.yaw, myCam.pitch, myCam.roll);
+        Matrix viewTL = camera4x4(topCam.x, topCam.y, topCam.z, topCam.yaw, topCam.pitch, topCam.roll);
+        Matrix viewBL = camera4x4(frontCam.x, frontCam.y, frontCam.z, frontCam.yaw, frontCam.pitch, frontCam.roll);
+        Matrix viewBR = camera4x4(sideCam.x, sideCam.y, sideCam.z, sideCam.yaw, sideCam.pitch, sideCam.roll);
+        Matrix proj   = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
+
+        imageUniforms.insertPtr((void*)&myImage);
+        imageUniforms.insertPtr((void*)&model);
+        imageUniforms.insertPtr((void*)&viewTR);
+        imageUniforms.insertPtr((void*)&proj);
+
+        FragmentShader fragImg;
+        fragImg.FragShader = imageFragShader;
+
+        VertexShader vertImg;
+        vertImg.VertShader = SimpleVertexShader2; // copy of vert shader
+
+        // Draw image triangle 
+        // Top Right - Perspective
+        DrawPrimitive(TRIANGLE, topRight, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topRight, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
+
+        // Top Left
+        imageUniforms[2].ptr = (void*)&viewTL;
+        DrawPrimitive(TRIANGLE, topLeft, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topLeft, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
+ 
+        // Bot Left
+        imageUniforms[2].ptr = (void*)&viewBL;
+        DrawPrimitive(TRIANGLE, botLeft, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, botLeft, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
+   
+        // Bot Right
+        imageUniforms[2].ptr = (void*)&viewBR;
+        DrawPrimitive(TRIANGLE, botRight, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, botRight, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
+   
         // Blit four panels to target
         int yStartSrc = 0;
         int xStartSrc = 0;
@@ -604,7 +709,8 @@ void TestPipeline(Buffer2D<PIXEL> & target)
         
         model.addTranslate(0, 0, 0);
         Matrix view = camera4x4(myCam.x, myCam.y, myCam.z, myCam.yaw, myCam.pitch, myCam.roll);
-        Matrix proj = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
+        Matrix proj = orthogonal4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
+        // Matrix proj = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
 
         // Uniforms -- add these to attributes as member variables
         // [0] -> Image reference

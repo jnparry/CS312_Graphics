@@ -71,6 +71,9 @@ struct camControls
 
 // Global var
 camControls myCam;
+camControls topCam   = {0, 0, 0, 0, 0, 0};
+camControls sideCam  = {0, 0, 0, 0, 0, 0};
+camControls frontCam = {0, 0, 0, 0, 0, 0};
 
 /****************************************************
  * For the new Image Loader
@@ -416,7 +419,7 @@ Matrix perspective4x4(const double &fovYDeg, const double &aspectRatio, const do
     rt[3][0] = 0;
     rt[3][1] = 0;
     rt[3][2] = 1;
-    rt[3][3] - 0;
+    rt[3][3] = 0;
 
     return rt;
 }
@@ -452,7 +455,7 @@ Matrix orthogonal4x4(const double &fovYDeg, const double &aspectRatio, const dou
     rt[3][0] = 0;
     rt[3][1] = 0;
     rt[3][2] = 1;
-    rt[3][3] - 0;
+    rt[3][3] = 0;
 
     return rt;
 }
@@ -716,7 +719,9 @@ class BufferImage : public Buffer2D<PIXEL>
         {
             ourSurfaceInstance = false;
             if(!readBMP(path))
+            {
                 return;
+            }
 
             ourBufferData = true;
         }
@@ -786,7 +791,7 @@ class Attributes
             }
         }
 
-        void concatMatrices    (const Matrix & transform) throw (const char *) { this->matrix *= transform; }
+        void concatMatrices    (const Matrix & transform) { this->matrix *= transform; }
         void correctPerspective(double z)
         {
             for (int i = 0; i < numValues; i++)
