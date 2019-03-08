@@ -165,10 +165,10 @@ void CADView(Buffer2D<PIXEL> & target)
         // Each CAD Quadrant
         static int halfWid = target.width()/2;
         static int halfHgt = target.height()/2;
-        static Buffer2D<PIXEL> topLeft (halfWid, halfHgt); // ortho
+        static Buffer2D<PIXEL> topLeft (halfWid, halfHgt); // ortho - top view
         static Buffer2D<PIXEL> topRight(halfWid, halfHgt); // persp
-        static Buffer2D<PIXEL> botLeft (halfWid, halfHgt); // ortho
-        static Buffer2D<PIXEL> botRight(halfWid, halfHgt); // ortho
+        static Buffer2D<PIXEL> botLeft (halfWid, halfHgt); // ortho - front view
+        static Buffer2D<PIXEL> botRight(halfWid, halfHgt); // ortho - side view
 
         // Your code goes here 
         // Feel free to copy from other test functions to get started!
@@ -197,62 +197,206 @@ void CADView(Buffer2D<PIXEL> & target)
                           {20, 20, 50, 1 }, // tl
                           {-20,20, 50, 1}}; // tr
 
+        // Front side
         Vertex     verticesImgA[3];
         Attributes imageAttributesA[3];
-        verticesImgA[0] = quad[0];
-        verticesImgA[1] = quad[1];
-        verticesImgA[2] = quad[2];
+        verticesImgA[0] = cube[0];
+        verticesImgA[1] = cube[1];
+        verticesImgA[2] = cube[2];
 
         Vertex     verticesImgB[3];        
         Attributes imageAttributesB[3];
-        verticesImgB[0] = quad[2];
-        verticesImgB[1] = quad[3];
-        verticesImgB[2] = quad[0];
+        verticesImgB[0] = cube[2];
+        verticesImgB[1] = cube[3];
+        verticesImgB[2] = cube[0];
+
+        // Right Side
+        Vertex     verticesImgC[3];
+        Attributes imageAttributesC[3];
+        verticesImgC[0] = cube[1];
+        verticesImgC[1] = cube[5];
+        verticesImgC[2] = cube[6];
+
+        Vertex     verticesImgD[3];        
+        Attributes imageAttributesD[3];
+        verticesImgD[0] = cube[6];
+        verticesImgD[1] = cube[2];
+        verticesImgD[2] = cube[1];
+
+        // Left Side
+        Vertex     verticesImgE[3];
+        Attributes imageAttributesE[3];
+        verticesImgE[0] = cube[4];
+        verticesImgE[1] = cube[0];
+        verticesImgE[2] = cube[3];
+
+        Vertex     verticesImgF[3];        
+        Attributes imageAttributesF[3];
+        verticesImgF[0] = cube[3];
+        verticesImgF[1] = cube[7];
+        verticesImgF[2] = cube[4];
+
+        // Top Side
+        Vertex     verticesImgG[3];
+        Attributes imageAttributesG[3];
+        verticesImgG[0] = cube[3];
+        verticesImgG[1] = cube[2];
+        verticesImgG[2] = cube[6];
+
+        Vertex     verticesImgH[3];        
+        Attributes imageAttributesH[3];
+        verticesImgH[0] = cube[6];
+        verticesImgH[1] = cube[7];
+        verticesImgH[2] = cube[3];
+
+        // Bottom Side
+        Vertex     verticesImgI[3];
+        Attributes imageAttributesI[3];
+        verticesImgI[0] = cube[4];
+        verticesImgI[1] = cube[5];
+        verticesImgI[2] = cube[1];
+
+        Vertex     verticesImgJ[3];        
+        Attributes imageAttributesJ[3];
+        verticesImgJ[0] = cube[1];
+        verticesImgJ[1] = cube[0];
+        verticesImgJ[2] = cube[4];
+
+        // Back Side
+        Vertex     verticesImgK[3];
+        Attributes imageAttributesK[3];
+        verticesImgK[0] = cube[5];
+        verticesImgK[1] = cube[4];
+        verticesImgK[2] = cube[7];
+
+        Vertex     verticesImgL[3];        
+        Attributes imageAttributesL[3];
+        verticesImgL[0] = cube[7];
+        verticesImgL[1] = cube[6];
+        verticesImgL[2] = cube[5];
 
         double coordinates[4][2] = { {0,0}, {1,0}, {1,1}, {0,1} };
         // Your texture coordinate code goes here for 'imageAttributesA, imageAttributesB'
 
         // image attrs A
-        imageAttributesA[0].attrValues[0].d = coordinates[0][0];
-        imageAttributesA[0].attrValues[1].d = coordinates[0][1];
-        imageAttributesA[0].numValues = 2;
-
-        imageAttributesA[1].attrValues[0].d = coordinates[1][0];
-        imageAttributesA[1].attrValues[1].d = coordinates[1][1];
-        imageAttributesA[1].numValues = 2;
-
-        imageAttributesA[2].attrValues[0].d = coordinates[2][0];
-        imageAttributesA[2].attrValues[1].d = coordinates[2][1];
-        imageAttributesA[2].numValues = 2;
+        imageAttributesA[0].insertDbl(coordinates[0][0]);
+        imageAttributesA[0].insertDbl(coordinates[0][1]);
+        imageAttributesA[1].insertDbl(coordinates[1][0]);
+        imageAttributesA[1].insertDbl(coordinates[1][1]);
+        imageAttributesA[2].insertDbl(coordinates[2][0]);
+        imageAttributesA[2].insertDbl(coordinates[2][1]);
 
         // image attrs B
-        imageAttributesB[0].attrValues[0].d = coordinates[2][0];
-        imageAttributesB[0].attrValues[1].d = coordinates[2][1];
-        imageAttributesB[0].numValues = 2;
+        imageAttributesB[0].insertDbl(coordinates[2][0]);
+        imageAttributesB[0].insertDbl(coordinates[2][1]);
+        imageAttributesB[1].insertDbl(coordinates[3][0]);
+        imageAttributesB[1].insertDbl(coordinates[3][1]);
+        imageAttributesB[2].insertDbl(coordinates[0][0]);
+        imageAttributesB[2].insertDbl(coordinates[0][1]);
 
-        imageAttributesB[1].attrValues[0].d = coordinates[3][0];
-        imageAttributesB[1].attrValues[1].d = coordinates[3][1];
-        imageAttributesB[1].numValues = 2;
+        // image attrs C
+        imageAttributesC[0].insertDbl(coordinates[2][0]);
+        imageAttributesC[0].insertDbl(coordinates[2][1]);
+        imageAttributesC[1].insertDbl(coordinates[3][0]);
+        imageAttributesC[1].insertDbl(coordinates[3][1]);
+        imageAttributesC[2].insertDbl(coordinates[0][0]);
+        imageAttributesC[2].insertDbl(coordinates[0][1]);
 
-        imageAttributesB[2].attrValues[0].d = coordinates[0][0];
-        imageAttributesB[2].attrValues[1].d = coordinates[0][1];
-        imageAttributesB[2].numValues = 2;
+        // image attrs D
+        imageAttributesD[0].insertDbl(coordinates[2][0]);
+        imageAttributesD[0].insertDbl(coordinates[2][1]);
+        imageAttributesD[1].insertDbl(coordinates[3][0]);
+        imageAttributesD[1].insertDbl(coordinates[3][1]);
+        imageAttributesD[2].insertDbl(coordinates[0][0]);
+        imageAttributesD[2].insertDbl(coordinates[0][1]);
 
-        static BufferImage myImage("rubiksred.bmp");
+        // image attrs E
+        imageAttributesE[0].insertDbl(coordinates[2][0]);
+        imageAttributesE[0].insertDbl(coordinates[2][1]);
+        imageAttributesE[1].insertDbl(coordinates[3][0]);
+        imageAttributesE[1].insertDbl(coordinates[3][1]);
+        imageAttributesE[2].insertDbl(coordinates[0][0]);
+        imageAttributesE[2].insertDbl(coordinates[0][1]);
+
+        // image attrs F
+        imageAttributesF[0].insertDbl(coordinates[2][0]);
+        imageAttributesF[0].insertDbl(coordinates[2][1]);
+        imageAttributesF[1].insertDbl(coordinates[3][0]);
+        imageAttributesF[1].insertDbl(coordinates[3][1]);
+        imageAttributesF[2].insertDbl(coordinates[0][0]);
+        imageAttributesF[2].insertDbl(coordinates[0][1]);
+
+        // image attrs G
+        imageAttributesG[0].insertDbl(coordinates[2][0]);
+        imageAttributesG[0].insertDbl(coordinates[2][1]);
+        imageAttributesG[1].insertDbl(coordinates[3][0]);
+        imageAttributesG[1].insertDbl(coordinates[3][1]);
+        imageAttributesG[2].insertDbl(coordinates[0][0]);
+        imageAttributesG[2].insertDbl(coordinates[0][1]);
+
+        // image attrs H
+        imageAttributesH[0].insertDbl(coordinates[2][0]);
+        imageAttributesH[0].insertDbl(coordinates[2][1]);
+        imageAttributesH[1].insertDbl(coordinates[3][0]);
+        imageAttributesH[1].insertDbl(coordinates[3][1]);
+        imageAttributesH[2].insertDbl(coordinates[0][0]);
+        imageAttributesH[2].insertDbl(coordinates[0][1]);
+
+        // image attrs I
+        imageAttributesI[0].insertDbl(coordinates[2][0]);
+        imageAttributesI[0].insertDbl(coordinates[2][1]);
+        imageAttributesI[1].insertDbl(coordinates[3][0]);
+        imageAttributesI[1].insertDbl(coordinates[3][1]);
+        imageAttributesI[2].insertDbl(coordinates[0][0]);
+        imageAttributesI[2].insertDbl(coordinates[0][1]);
+
+        // image attrs J
+        imageAttributesJ[0].insertDbl(coordinates[2][0]);
+        imageAttributesJ[0].insertDbl(coordinates[2][1]);
+        imageAttributesJ[1].insertDbl(coordinates[3][0]);
+        imageAttributesJ[1].insertDbl(coordinates[3][1]);
+        imageAttributesJ[2].insertDbl(coordinates[0][0]);
+        imageAttributesJ[2].insertDbl(coordinates[0][1]);
+
+        // image attrs K
+        imageAttributesK[0].insertDbl(coordinates[2][0]);
+        imageAttributesK[0].insertDbl(coordinates[2][1]);
+        imageAttributesK[1].insertDbl(coordinates[3][0]);
+        imageAttributesK[1].insertDbl(coordinates[3][1]);
+        imageAttributesK[2].insertDbl(coordinates[0][0]);
+        imageAttributesK[2].insertDbl(coordinates[0][1]);
+
+        // image attrs L
+        imageAttributesL[0].insertDbl(coordinates[2][0]);
+        imageAttributesL[0].insertDbl(coordinates[2][1]);
+        imageAttributesL[1].insertDbl(coordinates[3][0]);
+        imageAttributesL[1].insertDbl(coordinates[3][1]);
+        imageAttributesL[2].insertDbl(coordinates[0][0]);
+        imageAttributesL[2].insertDbl(coordinates[0][1]);
+
+        static BufferImage myImage1("rubiksred.bmp"   );
+        static BufferImage myImage2("rubiksblue.bmp"  );
+        static BufferImage myImage3("rubiksgreen.bmp" );
+        static BufferImage myImage4("rubiksyellow.bmp");
+        static BufferImage myImage5("rubikswhite.bmp" );
+        static BufferImage myImage6("rubiksorange.bmp");
+
         Attributes  imageUniforms;
         Matrix      model;
-        
+
         model.addTranslate(0, 0, 0);
         Matrix viewTR = camera4x4(myCam.x, myCam.y, myCam.z, myCam.yaw, myCam.pitch, myCam.roll);
         Matrix viewTL = camera4x4(topCam.x, topCam.y, topCam.z, topCam.yaw, topCam.pitch, topCam.roll);
         Matrix viewBL = camera4x4(frontCam.x, frontCam.y, frontCam.z, frontCam.yaw, frontCam.pitch, frontCam.roll);
         Matrix viewBR = camera4x4(sideCam.x, sideCam.y, sideCam.z, sideCam.yaw, sideCam.pitch, sideCam.roll);
-        Matrix proj   = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
+        
+        Matrix projTR = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
+        Matrix projx3 = orthogonal4x4(25, 25, 1, 200); // right top near far
 
-        imageUniforms.insertPtr((void*)&myImage);
+        imageUniforms.insertPtr((void*)&myImage1);
         imageUniforms.insertPtr((void*)&model);
         imageUniforms.insertPtr((void*)&viewTR);
-        imageUniforms.insertPtr((void*)&proj);
+        imageUniforms.insertPtr((void*)&projTR);
 
         FragmentShader fragImg;
         fragImg.FragShader = imageFragShader;
@@ -262,23 +406,53 @@ void CADView(Buffer2D<PIXEL> & target)
 
         // Draw image triangle 
         // Top Right - Perspective
+        // front plane
         DrawPrimitive(TRIANGLE, topRight, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
         DrawPrimitive(TRIANGLE, topRight, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
 
-        // Top Left
+        // // right plane
+        imageUniforms[0].ptr = (void*)&myImage2;
+        DrawPrimitive(TRIANGLE, topRight, verticesImgC, imageAttributesC, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topRight, verticesImgD, imageAttributesD, &imageUniforms, &fragImg, &vertImg);
+
+        // // left plane
+        imageUniforms[0].ptr = (void*)&myImage3;
+        DrawPrimitive(TRIANGLE, topRight, verticesImgE, imageAttributesE, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topRight, verticesImgF, imageAttributesF, &imageUniforms, &fragImg, &vertImg);
+
+        // // top plane
+        imageUniforms[0].ptr = (void*)&myImage4;
+        DrawPrimitive(TRIANGLE, topRight, verticesImgG, imageAttributesG, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topRight, verticesImgH, imageAttributesH, &imageUniforms, &fragImg, &vertImg);
+        
+        // bottom plane
+        imageUniforms[0].ptr = (void*)&myImage5;
+        DrawPrimitive(TRIANGLE, topRight, verticesImgI, imageAttributesI, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topRight, verticesImgJ, imageAttributesJ, &imageUniforms, &fragImg, &vertImg);
+
+        // // back plane
+        imageUniforms[0].ptr = (void*)&myImage6;
+        DrawPrimitive(TRIANGLE, topRight, verticesImgK, imageAttributesK, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topRight, verticesImgL, imageAttributesL, &imageUniforms, &fragImg, &vertImg);
+
+        // Top Left - Top View
+        imageUniforms[0].ptr = (void*)&myImage4;
         imageUniforms[2].ptr = (void*)&viewTL;
-        DrawPrimitive(TRIANGLE, topLeft, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
-        DrawPrimitive(TRIANGLE, topLeft, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
+        imageUniforms[3].ptr = (void*)&projx3;
+        DrawPrimitive(TRIANGLE, topLeft, verticesImgG, imageAttributesG, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, topLeft, verticesImgH, imageAttributesH, &imageUniforms, &fragImg, &vertImg);
  
-        // Bot Left
+        // Bot Left - Front View
+        imageUniforms[0].ptr = (void*)&myImage1;
         imageUniforms[2].ptr = (void*)&viewBL;
         DrawPrimitive(TRIANGLE, botLeft, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
         DrawPrimitive(TRIANGLE, botLeft, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
    
-        // Bot Right
+        // Bot Right - Side (Right) View
+        imageUniforms[0].ptr = (void*)&myImage2;
         imageUniforms[2].ptr = (void*)&viewBR;
-        DrawPrimitive(TRIANGLE, botRight, verticesImgA, imageAttributesA, &imageUniforms, &fragImg, &vertImg);
-        DrawPrimitive(TRIANGLE, botRight, verticesImgB, imageAttributesB, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, botRight, verticesImgC, imageAttributesC, &imageUniforms, &fragImg, &vertImg);
+        DrawPrimitive(TRIANGLE, botRight, verticesImgD, imageAttributesD, &imageUniforms, &fragImg, &vertImg);
    
         // Blit four panels to target
         int yStartSrc = 0;

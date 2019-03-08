@@ -22,7 +22,7 @@ void imageFragShader(PIXEL & fragment, const Attributes & vertAttr, const Attrib
     int x = vertAttr[0].d * (myPointer->width() - 1);
     int y = vertAttr[1].d * (myPointer->height() - 1);
 
-    if(x > 2000 || x < 0)
+    if(x > 511 || x < 0)
     {
         fragment = 0xff00ff00;
         return;

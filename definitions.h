@@ -71,8 +71,8 @@ struct camControls
 
 // Global var
 camControls myCam;
-camControls topCam   = {0, 0, 0, 0, 0, 0};
-camControls sideCam  = {0, 0, 0, 0, 0, 0};
+camControls topCam   = {0, 70, 70, 0, 90, 0};
+camControls sideCam  = {70, 0, 70, -90, 0, 0};
 camControls frontCam = {0, 0, 0, 0, 0, 0};
 
 /****************************************************
@@ -427,14 +427,11 @@ Matrix perspective4x4(const double &fovYDeg, const double &aspectRatio, const do
 /*****************************************
  * Matrix helper functions
  * **************************************/
-Matrix orthogonal4x4(const double &fovYDeg, const double &aspectRatio, const double &near, const double &far)
+Matrix orthogonal4x4(const double &right, const double &top, const double &near, const double &far)
 {
     Matrix rt;
     rt.numRows = 4;
     rt.numCols = 4;
-
-    double top   = near * tan((fovYDeg * M_PI) / 180 / 2.0); // previous parenthesis after 180
-    double right = aspectRatio * top;
 
     rt[0][0] = 1 / right;
     rt[0][1] = 0;
@@ -449,13 +446,13 @@ Matrix orthogonal4x4(const double &fovYDeg, const double &aspectRatio, const dou
 
     rt[2][0] = 0;
     rt[2][1] = 0;
-    rt[2][2] = (-2) / (far - near);
+    rt[2][2] = 2 / (far - near);
     rt[2][3] = - (far + near) / (far - near);
 
     rt[3][0] = 0;
     rt[3][1] = 0;
-    rt[3][2] = 1;
-    rt[3][3] = 0;
+    rt[3][2] = 0;
+    rt[3][3] = 1;
 
     return rt;
 }
