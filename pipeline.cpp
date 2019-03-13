@@ -96,12 +96,12 @@ void processUserInputs(bool & running)
             myCam.z -= (cos((myCam.yaw / 180) * M_PI)) * MOVEMENT_SPEED;
             myCam.x -= (sin((myCam.yaw / 180) * M_PI)) * MOVEMENT_SPEED; // previous +=
         }
-        if (e.key.keysym.sym == 'a' && e.type == SDL_KEYDOWN) // swapped
+        if (e.key.keysym.sym == 'a' && e.type == SDL_KEYDOWN) 
         {
             myCam.x -= (cos((myCam.yaw / 180) * M_PI)) * MOVEMENT_SPEED;
             myCam.z += (sin((myCam.yaw / 180) * M_PI)) * MOVEMENT_SPEED; // previous -=
         }
-        if (e.key.keysym.sym == 'd' && e.type == SDL_KEYDOWN) // swapped
+        if (e.key.keysym.sym == 'd' && e.type == SDL_KEYDOWN) 
         {
             myCam.x += (cos((myCam.yaw / 180) * M_PI)) * MOVEMENT_SPEED;
             myCam.z -= (sin((myCam.yaw / 180) * M_PI)) * MOVEMENT_SPEED; // previous +=
