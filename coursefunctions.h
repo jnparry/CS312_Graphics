@@ -629,6 +629,156 @@ void TestPipeline(Buffer2D<PIXEL> & target)
         // NOTE: To test the Z-Buffer additinonal draw calls/geometry need to be called into this scene
 }
 
+/********************************************
+ * Test Visible Surface Determination
+ *******************************************/
+void TestVSD(Buffer2D<PIXEL> & target)
+{
+        
+        static Buffer2D<double> zBuf(target.width(), target.height());
+        // Will need to be cleared every frame, like the screen
 
+        /**************************************************
+        * 1. Image quad (2 TRIs) Code (texture interpolated)
+        **************************************************/
+        Vertex wall1[] = { {  10,   0,  80, 1},
+                           {  60,   0,  50, 1},
+                           {  60,  40,  50, 1},
+                           {  10,  40,  80, 1}};
+
+        Vertex wall2[] = { {  85,   0,  35, 1},
+                           { 135,   0,   5, 1},
+                           { 135,  40,   5, 1},
+                           {  85,  40,  35, 1}};
+
+        Vertex wall3[] = { {  35,   0,  65, 1},
+                           { 110,   0,  20, 1},
+                           { 110,  40,  20, 1},
+                           {  35,  40,  65, 1}};
+
+        // WALL 1
+        Vertex     wall1ImgA[3];
+        Attributes wall1AttributesA[3];
+        wall1ImgA[0] = wall1[0];
+        wall1ImgA[1] = wall1[1];
+        wall1ImgA[2] = wall1[2];
+
+        Vertex     wall1ImgB[3];        
+        Attributes wall1AttributesB[3];
+        wall1ImgB[0] = wall1[2];
+        wall1ImgB[1] = wall1[3];
+        wall1ImgB[2] = wall1[0];
+
+        // WALL 2
+        Vertex     wall2ImgA[3];
+        Attributes wall2AttributesA[3];
+        wall2ImgA[0] = wall2[0];
+        wall2ImgA[1] = wall2[1];
+        wall2ImgA[2] = wall2[2];
+
+        Vertex     wall2ImgB[3];        
+        Attributes wall2AttributesB[3];
+        wall2ImgB[0] = wall2[2];
+        wall2ImgB[1] = wall2[3];
+        wall2ImgB[2] = wall2[0];
+
+        // WALL 3
+        Vertex     wall3ImgA[3];
+        Attributes wall3AttributesA[3];
+        wall3ImgA[0] = wall3[0];
+        wall3ImgA[1] = wall3[1];
+        wall3ImgA[2] = wall3[2];
+
+        Vertex     wall3ImgB[3];        
+        Attributes wall3AttributesB[3];
+        wall3ImgB[0] = wall3[2];
+        wall3ImgB[1] = wall3[3];
+        wall3ImgB[2] = wall3[0];
+
+        double coordinates[4][2] = { {0,0}, {1,0}, {1,1}, {0,1} };
+        // Your texture coordinate code goes here for 'imageAttributesA, imageAttributesB'
+
+        // WALL 1
+        wall1AttributesA[0].insertDbl(coordinates[0][0]);
+        wall1AttributesA[0].insertDbl(coordinates[0][1]);
+        wall1AttributesA[1].insertDbl(coordinates[1][0]);
+        wall1AttributesA[1].insertDbl(coordinates[1][1]);
+        wall1AttributesA[2].insertDbl(coordinates[2][0]);
+        wall1AttributesA[2].insertDbl(coordinates[2][1]);
+
+        wall1AttributesB[0].insertDbl(coordinates[2][0]);
+        wall1AttributesB[0].insertDbl(coordinates[2][1]);
+        wall1AttributesB[1].insertDbl(coordinates[3][0]);
+        wall1AttributesB[1].insertDbl(coordinates[3][1]);
+        wall1AttributesB[2].insertDbl(coordinates[0][0]);
+        wall1AttributesB[2].insertDbl(coordinates[0][1]);
+
+        // WALL 2
+        wall2AttributesA[0].insertDbl(coordinates[0][0]);
+        wall2AttributesA[0].insertDbl(coordinates[0][1]);
+        wall2AttributesA[1].insertDbl(coordinates[1][0]);
+        wall2AttributesA[1].insertDbl(coordinates[1][1]);
+        wall2AttributesA[2].insertDbl(coordinates[2][0]);
+        wall2AttributesA[2].insertDbl(coordinates[2][1]);
+
+        wall2AttributesB[0].insertDbl(coordinates[2][0]);
+        wall2AttributesB[0].insertDbl(coordinates[2][1]);
+        wall2AttributesB[1].insertDbl(coordinates[3][0]);
+        wall2AttributesB[1].insertDbl(coordinates[3][1]);
+        wall2AttributesB[2].insertDbl(coordinates[0][0]);
+        wall2AttributesB[2].insertDbl(coordinates[0][1]);
+
+        // WALL 3
+        wall3AttributesA[0].insertDbl(coordinates[0][0]);
+        wall3AttributesA[0].insertDbl(coordinates[0][1]);
+        wall3AttributesA[1].insertDbl(coordinates[1][0]);
+        wall3AttributesA[1].insertDbl(coordinates[1][1]);
+        wall3AttributesA[2].insertDbl(coordinates[2][0]);
+        wall3AttributesA[2].insertDbl(coordinates[2][1]);
+
+        wall3AttributesB[0].insertDbl(coordinates[2][0]);
+        wall3AttributesB[0].insertDbl(coordinates[2][1]);
+        wall3AttributesB[1].insertDbl(coordinates[3][0]);
+        wall3AttributesB[1].insertDbl(coordinates[3][1]);
+        wall3AttributesB[2].insertDbl(coordinates[0][0]);
+        wall3AttributesB[2].insertDbl(coordinates[0][1]);
+
+        static BufferImage myImage("vsdphotos/spir1.bmp");
+        Attributes  imageUniforms;
+        Matrix      model;
+        
+        model.addTranslate(0, 0, 0);
+        Matrix view = camera4x4(myCam.x, myCam.y, myCam.z, myCam.yaw, myCam.pitch, myCam.roll);
+        Matrix proj = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
+
+        // Uniforms -- add these to attributes as member variables
+        // [0] -> Image reference
+        // [1] -> Model transform
+        // [2] -> View transform
+
+        imageUniforms.insertPtr((void*)&myImage);
+        imageUniforms.insertPtr((void*)&model);
+        imageUniforms.insertPtr((void*)&view);
+        imageUniforms.insertPtr((void*)&proj);
+
+        FragmentShader fragImg;
+        fragImg.FragShader = imageFragShader;
+
+        VertexShader vertImg;
+        vertImg.VertShader = SimpleVertexShader2; // copy of vert shader
+
+        // Draw image triangle 
+        // WALL 1
+        DrawPrimitive(TRIANGLE, target, wall1ImgA, wall1AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
+        DrawPrimitive(TRIANGLE, target, wall1ImgB, wall1AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
+
+        // WALL 2
+        
+        DrawPrimitive(TRIANGLE, target, wall1ImgA, wall1AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
+        DrawPrimitive(TRIANGLE, target, wall1ImgB, wall1AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
+
+
+        // NOTE: To test the Z-Buffer additinonal draw calls/geometry need to be called into this scene
+}
 
 #endif
