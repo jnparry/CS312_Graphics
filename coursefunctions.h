@@ -743,7 +743,11 @@ void TestVSD(Buffer2D<PIXEL> & target)
         wall3AttributesB[2].insertDbl(coordinates[0][0]);
         wall3AttributesB[2].insertDbl(coordinates[0][1]);
 
-        static BufferImage myImage("vsdphotos/spir1.bmp");
+        static BufferImage myImage1("vsdphotos/howl1.bmp");
+        static BufferImage myImage2("vsdphotos/howl2.bmp");
+        static BufferImage myImage3("vsdphotos/howl3.bmp");
+
+
         Attributes  imageUniforms;
         Matrix      model;
         
@@ -751,13 +755,16 @@ void TestVSD(Buffer2D<PIXEL> & target)
         Matrix view = camera4x4(myCam.x, myCam.y, myCam.z, myCam.yaw, myCam.pitch, myCam.roll);
         Matrix proj = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
 
+        Matrix newModel;
+        newModel.addTranslate(25, 0, 15);
+
         // Uniforms -- add these to attributes as member variables
         // [0] -> Image reference
         // [1] -> Model transform
         // [2] -> View transform
 
-        imageUniforms.insertPtr((void*)&myImage);
-        imageUniforms.insertPtr((void*)&model);
+        imageUniforms.insertPtr((void*)&myImage3);
+        imageUniforms.insertPtr((void*)&newModel);
         imageUniforms.insertPtr((void*)&view);
         imageUniforms.insertPtr((void*)&proj);
 
@@ -768,15 +775,20 @@ void TestVSD(Buffer2D<PIXEL> & target)
         vertImg.VertShader = SimpleVertexShader2; // copy of vert shader
 
         // Draw image triangle 
+        // BACK WALL - WALL 3
+        DrawPrimitive(TRIANGLE, target, wall3ImgA, wall3AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
+        DrawPrimitive(TRIANGLE, target, wall3ImgB, wall3AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
+
         // WALL 1
+        imageUniforms[0].ptr = (void*)&myImage1;
+        imageUniforms[1].ptr = (void*)&model;
         DrawPrimitive(TRIANGLE, target, wall1ImgA, wall1AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
         DrawPrimitive(TRIANGLE, target, wall1ImgB, wall1AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
 
         // WALL 2
-        
-        DrawPrimitive(TRIANGLE, target, wall1ImgA, wall1AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
-        DrawPrimitive(TRIANGLE, target, wall1ImgB, wall1AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
-
+        imageUniforms[0].ptr = (void*)&myImage2;
+        DrawPrimitive(TRIANGLE, target, wall2ImgA, wall2AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
+        DrawPrimitive(TRIANGLE, target, wall2ImgB, wall2AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
 
         // NOTE: To test the Z-Buffer additinonal draw calls/geometry need to be called into this scene
 }
