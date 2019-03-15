@@ -115,9 +115,7 @@ float crossProduct(const double & a, const double & b, const double & c, const d
 }
 
 /****************************************
- * DRAW_POINT
- * Renders a point to the screen with the
- * appropriate coloring.
+ * INTERPOLATE Z
  ***************************************/
 double interpZ(const double &det1, const double &det2, const double &det3, const double &area, const Vertex vertices[3])
 {
