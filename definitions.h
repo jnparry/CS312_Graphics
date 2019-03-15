@@ -771,7 +771,7 @@ class Attributes
         /*******************************************************
          * MEMBER FUNCTIONS
          * ****************************************************/
-        void interpolateValues(const double & det1, const double & det2, const double & det3, const double & area, Attributes* vertAttrs)
+        void interpolateValues(const double &det1, const double &det2, const double &det3, const double &area, Attributes* vertAttrs, const double &z)
         {
             double w1 = det1 / area;
             double w2 = det2 / area;
@@ -779,9 +779,9 @@ class Attributes
 
             for (int i = 0; i < numValues; i++)
             {
-                attrValues[i].d = vertAttrs[0].attrValues[i].d * w2 +
-                                  vertAttrs[1].attrValues[i].d * w3 +
-                                  vertAttrs[2].attrValues[i].d * w1;
+                attrValues[i].d = (vertAttrs[0].attrValues[i].d * w2 +
+                                   vertAttrs[1].attrValues[i].d * w3 +
+                                   vertAttrs[2].attrValues[i].d * w1) * z;
                 
             }
         }

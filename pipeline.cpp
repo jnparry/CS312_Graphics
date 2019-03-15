@@ -189,8 +189,8 @@ void DrawTriangle(Buffer2D<PIXEL> & target, Vertex* const triangle, Attributes* 
 
                 Attributes interpolatedAttribs;
                 interpolatedAttribs.numValues = attrs[0].numValues;
-                interpolatedAttribs.interpolateValues(det1, det2, det3, area, attrs);
-                interpolatedAttribs.correctPerspective(correctZ);
+                interpolatedAttribs.interpolateValues(det1, det2, det3, area, attrs, correctZ);
+                // interpolatedAttribs.correctPerspective(correctZ);
                 
                 frag->FragShader(target[y][x], interpolatedAttribs, *uniforms);
             }
