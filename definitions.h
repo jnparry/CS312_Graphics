@@ -95,14 +95,21 @@ struct bmpLayout
     unsigned short bpp;
 };
 
+/****************************************************
+ * QUAD
+ * This is a quad class for the BSP tree to be less
+ * complicated
+ ****************************************************/
 class Quad
 {
     public:
         Vertex verts[4];
-
-
 };
 
+/****************************************************
+ * NODE
+ * This is our node class for our BSP tree
+ ****************************************************/
 class Node
 {
     public:
@@ -117,6 +124,11 @@ class Node
         Vertex * isIntersected(); // only x and z are relevant - y is always 39
 };
 
+/****************************************************
+ * BSP TREE
+ * This is our Binary Space Partition Tree which we
+ * are using to do VSD (Visible Surface Determination)
+ ****************************************************/
 class BSPTree
 {
     public:
@@ -798,7 +810,7 @@ class Attributes
         /*******************************************************
          * MEMBER FUNCTIONS
          * ****************************************************/
-        void interpolateValues(const double & det1, const double & det2, const double & det3, const double & area, Attributes* vertAttrs, const Vertex vertices[3])
+        void interpolateValues(const double & det1, const double & det2, const double & area, Attributes* vertAttrs, const Vertex vertices[3])
         {
             double w1 = det1 / area;
             double w2 = det2 / area;
