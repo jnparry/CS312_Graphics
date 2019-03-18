@@ -2,8 +2,13 @@
 #include "definitions.h"
 #include "coursefunctions.h"
 
+<<<<<<< HEAD
 #define MOUSE_SPEED 0.05
 #define MOVE_SPEED 2
+=======
+#define MOVE_SPEED 1
+#define MOUSE_SPEED 0.05
+>>>>>>> jparry_actual_finished_pipeline
 
 /***********************************************
  * CLEAR_SCREEN
@@ -63,8 +68,13 @@ void processUserInputs(bool & running)
                 double mouseX = e.motion.xrel;
                 double mouseY = e.motion.yrel;
 
+<<<<<<< HEAD
                 myCam.yaw -= mouseX * MOUSE_SPEED; // -=
                 myCam.pitch -= mouseY * MOUSE_SPEED; // +=
+=======
+                myCam.yaw -= mouseX * MOUSE_SPEED;
+                myCam.pitch += mouseY * MOUSE_SPEED;
+>>>>>>> jparry_actual_finished_pipeline
             }
         }
 
@@ -86,23 +96,40 @@ void processUserInputs(bool & running)
         // translation
         if (e.key.keysym.sym == 'w' && e.type == SDL_KEYDOWN)
         {
+<<<<<<< HEAD
             myCam.z += (cos((myCam.yaw / 180) * M_PI)) * MOVE_SPEED; // previous * 0.05
             myCam.x += (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED; // previous -=
+=======
+            myCam.z += (cos((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+            myCam.x += (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+>>>>>>> jparry_actual_finished_pipeline
         }
         if (e.key.keysym.sym == 's' && e.type == SDL_KEYDOWN)
         {
             myCam.z -= (cos((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+<<<<<<< HEAD
             myCam.x -= (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED; // previous +=
+=======
+            myCam.x -= (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+>>>>>>> jparry_actual_finished_pipeline
         }
         if (e.key.keysym.sym == 'a' && e.type == SDL_KEYDOWN)
         {
             myCam.x -= (cos((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+<<<<<<< HEAD
             myCam.z += (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED; // previous -=
+=======
+            myCam.z += (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+>>>>>>> jparry_actual_finished_pipeline
         }
         if (e.key.keysym.sym == 'd' && e.type == SDL_KEYDOWN)
         {
             myCam.x += (cos((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+<<<<<<< HEAD
             myCam.z -= (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED; // previous +=
+=======
+            myCam.z -= (sin((myCam.yaw / 180) * M_PI)) * MOVE_SPEED;
+>>>>>>> jparry_actual_finished_pipeline
         }
     }
 }
@@ -115,23 +142,6 @@ void processUserInputs(bool & running)
 float crossProduct(const double & a, const double & b, const double & c, const double & d)
 {
     return ((a * d) - (b * c));
-}
-
-/****************************************
- * DRAW_POINT
- * Renders a point to the screen with the
- * appropriate coloring.
- ***************************************/
-double interpZ(const double &det1, const double &det2, const double &det3, const double &area, const Vertex vertices[3])
-{
-    double w1 = det1 / area;
-    double w2 = det2 / area;
-    double w3 = 1 - w2 - w1;
-
-    double w = vertices[0].w * w2 + vertices[1].w * w3 + vertices[2].w * w1;
-    double z = 1.0 / w;
-
-    return z;
 }
 
 /****************************************
@@ -180,7 +190,6 @@ void DrawTriangle(Buffer2D<PIXEL> & target, Vertex* const triangle, Attributes* 
         for (int y = minY; y <= maxY; y++) // starting at the bottomost side
         {
             // now we do the crossproduct of the moving vert (v3, which is being incremented) and constant verts (v1 & v2) and put them in respect to the original crossproduct by dividing by the crossproduct of v1 and v2
-            
             double det1 = crossProduct(v1.x, x - triangle[0].x, v1.y, y - triangle[0].y);
             double det2 = crossProduct(v2.x, x - triangle[1].x, v2.y, y - triangle[1].y);
             double det3 = crossProduct(v3.x, x - triangle[2].x, v3.y, y - triangle[2].y);
@@ -188,12 +197,9 @@ void DrawTriangle(Buffer2D<PIXEL> & target, Vertex* const triangle, Attributes* 
             // now we are checking to see if the area ratio (a or b) are positive, then we see if combined they equal or are less than the actual triangle area
             if ((det1 >= 0) && (det2 >= 0) && (det3 >= 0))
             {
-                double correctZ = interpZ(det1, det2, det3, area, triangle);
-
                 Attributes interpolatedAttribs;
                 interpolatedAttribs.numValues = attrs[0].numValues;
-                interpolatedAttribs.interpolateValues(det1, det2, det3, area, attrs);
-                interpolatedAttribs.correctPerspective(correctZ);
+                interpolatedAttribs.interpolateValues(det1, det2, det3, area, attrs, triangle);
                 
                 frag->FragShader(target[y][x], interpolatedAttribs, *uniforms);
             }
@@ -811,9 +817,13 @@ int main()
         // Test Draw
         // GameOfLife(frame); // to run this, comment out other draw functions, clearscreen, and processuserinputs
         // TestVertexShader(frame);
+<<<<<<< HEAD
         // TestPipeline(frame);
         // CADView(frame);
         TestVSD(frame);
+=======
+        TestPipeline(frame);
+>>>>>>> jparry_actual_finished_pipeline
 
         // Push to the GPU
         SendFrame(GPU_OUTPUT, REN, FRAME_BUF);
