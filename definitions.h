@@ -1,8 +1,10 @@
 #define SDL_MAIN_HANDLED
+#include <vector>
 #include "SDL2/SDL.h"
 #include "stdlib.h"
 #include "stdio.h"
 #include "math.h"
+
 
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
@@ -103,7 +105,80 @@ struct bmpLayout
 class Quad
 {
     public:
-        Vertex verts[4];
+        // variables
+        Vertex normal;
+        Vertex * verts;
+        Vertex * lineIntersection;
+
+        // methods
+        Quad() : verts(NULL) {}
+        Quad(Vertex newVerts[]) {
+            this->verts = new Vertex[4];
+            this->setVerts(newVerts);
+        }
+
+        ~Quad() {
+            delete verts;
+            delete lineIntersection;
+        }
+
+        bool isIntersected(Quad splitter) // only x and z are relevant - y is always 39
+        {
+            Vertex topVert    = { this->verts[0].x - splitter[0].x,    this->verts[0].y - splitter[0].y,    this->verts[0].z - splitter[0].z };
+            Vertex bottomVert = { this->verts[1].x - this->verts[0].x, this->verts[1].y - this->verts[0].y, this->verts[1].z - this->verts[0].z };
+
+            double numerator   = (( splitter.normal.x * topVert.x)    + ( splitter.normal.y * topVert.y)    + ( splitter.normal.z * topVert.z));
+            double denominator = ((-splitter.normal.x * bottomVert.x) + (-splitter.normal.y * bottomVert.y) + (-splitter.normal.z * bottomVert.z));
+
+            if (denominator == 0) // if it's zero, there is no intersection
+                return false;
+
+            double t = numerator / denominator;
+
+            SDL_assert(t > 0 && t < 1); // if it is not between 0 and 1, there is an issue
+
+            if (NULL == lineIntersection)
+                lineIntersection = new Vertex;
+
+            this->lineIntersection->x = this->verts[0].x + (t * (this->verts[1].x - this->verts[0].x));
+            this->lineIntersection->y = 0;
+            this->lineIntersection->z = this->verts[0].z + (t * (this->verts[1].z - this->verts[1].z));
+            this->lineIntersection->w = 1;
+            
+            return true;
+        }
+
+        void findNormal()
+        {
+            Vertex side1 = { verts[3].x - verts[0].x, verts[3].y - verts[0].y, verts[3].z - verts[0].z };
+            Vertex side2 = { verts[1].x - verts[0].x, verts[1].y - verts[0].y, verts[1].z - verts[0].z };
+            Vertex norm  = { side1.y * side2.z - side1.z * side2.y, side2.x * side1.z - side1.x * side2.z, side1.x * side2.y - side1.y * side2.x };
+            this->normal = norm;
+        }
+
+        void setVerts(Vertex newVerts[])
+        {
+            if (NULL == verts)
+                this->verts = new Vertex[4];
+            
+            for (int i = 0; i < 4; i++)
+                verts[i] = newVerts[i];
+
+            this->findNormal();
+        }
+
+        // overloaded operator
+        Vertex operator [] (const int &index) 
+        {
+            if (index >= 0 && index < 4 && NULL != verts)
+                return (Vertex)verts[index];
+        }
+
+        const Vertex operator [] (const int &index) const 
+        {
+            if (index >= 0 && index < 4 && NULL != verts)
+                return (Vertex)verts[index];
+        }
 };
 
 /****************************************************
@@ -115,13 +190,54 @@ class Node
     public:
         // variables
         Quad myQuad;
-        Vertex normal;
         Node * parent;
         Node * backChild;
         Node * frontChild;
 
         // methods
-        Vertex * isIntersected(); // only x and z are relevant - y is always 39
+        Node();
+        Node(Vertex quad[])
+        {
+            this->myQuad.setVerts(quad);
+        }
+
+        Node(Quad quad)
+        {
+            this->myQuad = quad;
+        }
+
+        bool isQuadIntersected(Node * current) // first step
+        {
+            return myQuad.isIntersected(current->myQuad);
+        }
+
+        void splitQuad(Node * newNode1, Node * newNode2) // second step
+        {
+            Vertex left[4]  = { { this->myQuad[0].x, this->myQuad[0].y, this->myQuad[0].z, this->myQuad[0].w }, 
+                                { this->myQuad.lineIntersection->x, this->myQuad.lineIntersection->y,      this->myQuad.lineIntersection->z, this->myQuad.lineIntersection->w }, 
+                                { this->myQuad.lineIntersection->x, this->myQuad.lineIntersection->y + 40, this->myQuad.lineIntersection->z, this->myQuad.lineIntersection->w }, 
+                                { this->myQuad[3].x, this->myQuad[3].y, this->myQuad[3].z, this->myQuad[3].w } };
+
+            Vertex right[4] = { { this->myQuad.lineIntersection->x, this->myQuad.lineIntersection->y, this->myQuad.lineIntersection->z, this->myQuad.lineIntersection->w }, 
+                                { this->myQuad[1].x, this->myQuad[1].y, this->myQuad[1].z, this->myQuad[1].w }, 
+                                { this->myQuad[2].x, this->myQuad[2].y, this->myQuad[2].z, this->myQuad[2].w },
+                                { this->myQuad.lineIntersection->x, this->myQuad.lineIntersection->y + 40, this->myQuad.lineIntersection->z, this->myQuad.lineIntersection->w } };
+
+            if (NULL == newNode1)
+                newNode1 = new Node(left);
+            else
+                newNode1->myQuad.setVerts(left);
+
+            if (NULL == newNode2)
+                newNode2 = new Node(right);
+            else
+                newNode2->myQuad.setVerts(right);
+        }
+
+        void partition(std::vector < Node * > front, std::vector < Node * > back) // third step
+        {
+            
+        }
 };
 
 /****************************************************
@@ -132,6 +248,11 @@ class Node
 class BSPTree
 {
     public:
+        // variables
+        Node * root;
+
+        // methods
+        Node * buildTree(std::vector< Node *> all);
 };
 
 /****************************************************
