@@ -111,15 +111,24 @@ class Quad
         Vertex * lineIntersection;
 
         // methods
-        Quad() : verts(NULL) {}
-        Quad(Vertex newVerts[]) {
+        Quad() : verts(NULL), lineIntersection(NULL) {}
+        Quad(Vertex newVerts[]) 
+        {
             this->verts = new Vertex[4];
             this->setVerts(newVerts);
+            this->lineIntersection = NULL;
+        }
+        Quad(Quad & newQuad) : verts(NULL), lineIntersection(NULL)
+        {
+            * this = newQuad;
         }
 
         ~Quad() {
-            delete verts;
-            delete lineIntersection;
+            if (NULL != this->verts)
+                delete [] verts;
+
+            if (NULL != this->lineIntersection)
+                delete lineIntersection;
         }
 
         bool isIntersected(Quad splitter) // only x and z are relevant - y is always 39
@@ -179,6 +188,20 @@ class Quad
             if (index >= 0 && index < 4 && NULL != verts)
                 return (Vertex)verts[index];
         }
+
+        Quad & operator = (const Quad & rhs)
+        {
+            if (NULL == this->verts)
+                this->verts = new Vertex[4];
+
+            if (NULL == rhs.verts)
+                return * this;
+
+            for (int i = 0; i < 4; i++)
+                this->verts[i] = rhs.verts[i];
+
+            return * this;
+        }
 };
 
 /****************************************************
@@ -195,15 +218,32 @@ class Node
         Node * frontChild;
 
         // methods
-        Node();
-        Node(Vertex quad[])
+        Node() : parent(NULL), backChild(NULL), frontChild(NULL) {}
+        Node(Vertex quad[]) : parent(NULL), backChild(NULL), frontChild(NULL)
         {
             this->myQuad.setVerts(quad);
         }
 
-        Node(Quad quad)
+        Node(Quad quad) : parent(NULL), backChild(NULL), frontChild(NULL)
         {
             this->myQuad = quad;
+        }
+
+        Node(Node & newNode) : parent(NULL), backChild(NULL), frontChild(NULL)
+        {
+            * this = newNode;
+        }
+
+        ~Node()
+        {
+            if (NULL != this->parent)
+                delete parent;
+
+            if (NULL != this->frontChild)
+                delete frontChild;
+
+            if (NULL != this->backChild)
+                delete backChild;
         }
 
         bool isQuadIntersected(Node * current) // first step
@@ -237,6 +277,16 @@ class Node
         void partition(std::vector < Node * > front, std::vector < Node * > back) // third step
         {
             
+        }
+
+        Node & operator = (const Node & rhs)
+        {
+            this->myQuad = rhs.myQuad;
+            this->parent = rhs.parent;
+            this->backChild = rhs.backChild;
+            this->frontChild = rhs.frontChild;
+
+            return * this;
         }
 };
 

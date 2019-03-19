@@ -669,11 +669,20 @@ void TestVSD(Buffer2D<PIXEL> & target)
         wall3ImgA[1] = wall3[1];
         wall3ImgA[2] = wall3[2];
 
-        Vertex     wall3ImgB[3];        
+        Vertex     wall3ImgB[4];        
         Attributes wall3AttributesB[3];
         wall3ImgB[0] = wall3[2];
         wall3ImgB[1] = wall3[3];
         wall3ImgB[2] = wall3[0];
+
+        Quad testQuad1(wall1); // quad constructor with verts
+        Quad testQuad2(wall2);
+        testQuad1 = testQuad2; // quad assignment
+        Quad testQuad3(testQuad2); // quad constructor with quad
+        Node testNode1(wall1); // node constructor with verts
+        Node testNode2(testQuad1); // node constrictur with quad
+        Node testNode3(testNode1); // node constructor with a node
+        testNode3 = testNode2; // node assignment
 
         double coordinates[4][2] = { {0,0}, {1,0}, {1,1}, {0,1} };
         // Your texture coordinate code goes here for 'imageAttributesA, imageAttributesB'
