@@ -274,9 +274,9 @@ class Node
                 newNode2->myQuad.setVerts(right);
         }
 
-        void partition(std::vector < Node * > front, std::vector < Node * > back) // third step
+        bool isFront() // third step
         {
-            
+            return false;
         }
 
         Node & operator = (const Node & rhs)
