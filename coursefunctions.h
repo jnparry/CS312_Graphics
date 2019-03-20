@@ -1,3 +1,4 @@
+#include "iostream"
 #include "definitions.h"
 #include "shaders.h"
 
@@ -631,10 +632,10 @@ void TestVSD(Buffer2D<PIXEL> & target)
                            { 135,  40,   5, 1},
                            {  85,  40,  35, 1}};
 
-        Vertex wall3[] = { {  35,   0,  65, 1},
-                           { 110,   0,  20, 1},
-                           { 110,  40,  20, 1},
-                           {  35,  40,  65, 1}};
+        Vertex wall3[] = { {  60,   0,  80, 1},
+                           { 135,   0,  35, 1},
+                           { 135,  40,  35, 1},
+                           {  60,  40,  80, 1}};
 
         // WALL 1
         Vertex     wall1ImgA[3];
@@ -675,14 +676,47 @@ void TestVSD(Buffer2D<PIXEL> & target)
         wall3ImgB[1] = wall3[3];
         wall3ImgB[2] = wall3[0];
 
-        Quad testQuad1(wall1); // quad constructor with verts
-        Quad testQuad2(wall2);
-        testQuad1 = testQuad2; // quad assignment
-        Quad testQuad3(testQuad2); // quad constructor with quad
-        Node testNode1(wall1); // node constructor with verts
-        Node testNode2(testQuad1); // node constrictur with quad
-        Node testNode3(testNode1); // node constructor with a node
-        testNode3 = testNode2; // node assignment
+        // Quad testQuad1(wall1); // quad constructor with verts
+        // Quad testQuad2(wall2);
+        // testQuad1 = testQuad2; // quad assignment
+        // Quad testQuad3(testQuad2); // quad constructor with quad
+        // Node testNode1(wall1); // node constructor with verts
+        // Node testNode2(testQuad1); // node constrictur with quad
+        // Node testNode3(testNode1); // node constructor with a node
+        // testNode3 = testNode2; // node assignment
+
+        Node myWall1(wall1);
+        Node myWall2(wall2);
+        Node myWall3(wall3);
+
+        // og
+        Vertex tester1[] = { {  6,   0,  8, 1},
+                           {  10,   0,  4, 1},
+                           {  10,  40,  4, 1},
+                           {  6,  40,  8, 1}};
+
+        // previous toucher
+        Vertex tester2[] = { {  9,   0,  7, 1},
+                           { 10,   0,   11, 1},
+                           { 10,  40,   11, 1},
+                           {  9,  40,  7, 1}};
+
+        // flat
+        Vertex tester3[] = { {  2,   0,  6, 1},
+                           { 6,   0,  6, 1},
+                           { 6,  40,  6, 1},
+                           {  2,  0,  6, 1}};
+
+        Node * nodeA = new Node(tester1);
+        Node * nodeB = new Node (tester2);
+        Node * nodeC = new Node(tester3);
+
+        std::vector <Node *> testerVector;
+        testerVector.push_back(nodeB);
+        testerVector.push_back(nodeA);
+        testerVector.push_back(nodeC);
+
+        BSPTree myTree(testerVector);
 
         double coordinates[4][2] = { {0,0}, {1,0}, {1,1}, {0,1} };
         // Your texture coordinate code goes here for 'imageAttributesA, imageAttributesB'
@@ -744,16 +778,13 @@ void TestVSD(Buffer2D<PIXEL> & target)
         Matrix view = camera4x4(myCam.x, myCam.y, myCam.z, myCam.yaw, myCam.pitch, myCam.roll);
         Matrix proj = perspective4x4(60, 1.0, 1, 200); // FOV, aspect ratio, near, far
 
-        Matrix newModel;
-        newModel.addTranslate(25, 0, 15);
-
         // Uniforms -- add these to attributes as member variables
         // [0] -> Image reference
         // [1] -> Model transform
         // [2] -> View transform
 
         imageUniforms.insertPtr((void*)&myImage3);
-        imageUniforms.insertPtr((void*)&newModel);
+        imageUniforms.insertPtr((void*)&model);
         imageUniforms.insertPtr((void*)&view);
         imageUniforms.insertPtr((void*)&proj);
 
@@ -770,7 +801,6 @@ void TestVSD(Buffer2D<PIXEL> & target)
 
         // WALL 1
         imageUniforms[0].ptr = (void*)&myImage1;
-        imageUniforms[1].ptr = (void*)&model;
         DrawPrimitive(TRIANGLE, target, wall1ImgA, wall1AttributesA, &imageUniforms, &fragImg, &vertImg, &zBuf);
         DrawPrimitive(TRIANGLE, target, wall1ImgB, wall1AttributesB, &imageUniforms, &fragImg, &vertImg, &zBuf);
 

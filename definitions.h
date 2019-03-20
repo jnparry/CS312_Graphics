@@ -106,19 +106,21 @@ class Quad
 {
     public:
         // variables
+        double distance;
         Vertex normal;
         Vertex * verts;
         Vertex * lineIntersection;
 
         // methods
-        Quad() : verts(NULL), lineIntersection(NULL) {}
+        Quad() : verts(NULL), lineIntersection(NULL), distance(0.0) {}
         Quad(Vertex newVerts[]) 
         {
+            this->distance = 0.0;
             this->verts = new Vertex[4];
             this->setVerts(newVerts);
             this->lineIntersection = NULL;
         }
-        Quad(Quad & newQuad) : verts(NULL), lineIntersection(NULL)
+        Quad(Quad & newQuad) : verts(NULL), lineIntersection(NULL), distance(0.0)
         {
             * this = newQuad;
         }
@@ -131,7 +133,7 @@ class Quad
                 delete lineIntersection;
         }
 
-        bool isIntersected(Quad splitter) // only x and z are relevant - y is always 39
+        bool isIntersected(const Quad & splitter) // only x and z are relevant - y is always 39
         {
             Vertex topVert    = { this->verts[0].x - splitter[0].x,    this->verts[0].y - splitter[0].y,    this->verts[0].z - splitter[0].z };
             Vertex bottomVert = { this->verts[1].x - this->verts[0].x, this->verts[1].y - this->verts[0].y, this->verts[1].z - this->verts[0].z };
@@ -157,11 +159,29 @@ class Quad
             return true;
         }
 
+        void findDistance()
+        {
+            this->distance = -(this->normal.x * this->verts[0].x + 
+                               this->normal.y * this->verts[0].y + 
+                               this->normal.z * this->verts[0].z);
+        }
+
         void findNormal()
         {
             Vertex side1 = { verts[3].x - verts[0].x, verts[3].y - verts[0].y, verts[3].z - verts[0].z };
             Vertex side2 = { verts[1].x - verts[0].x, verts[1].y - verts[0].y, verts[1].z - verts[0].z };
-            Vertex norm  = { side1.y * side2.z - side1.z * side2.y, side2.x * side1.z - side1.x * side2.z, side1.x * side2.y - side1.y * side2.x };
+            
+            Vertex norm  = { side1.y * side2.z - side1.z * side2.y, 
+                             side2.x * side1.z - side1.x * side2.z, 
+                             side1.x * side2.y - side1.y * side2.x };
+            
+            // normalize
+            double mag = sqrt(pow(norm.x, 2) + pow(norm.y, 2) + pow(norm.z, 2));
+
+            norm.x /= mag;
+            norm.y /= mag;
+            norm.z /= mag;
+            
             this->normal = norm;
         }
 
@@ -174,6 +194,7 @@ class Quad
                 verts[i] = newVerts[i];
 
             this->findNormal();
+            this->findDistance();
         }
 
         // overloaded operator
@@ -191,14 +212,19 @@ class Quad
 
         Quad & operator = (const Quad & rhs)
         {
+            // if verts is null, initialize to a new vertex
             if (NULL == this->verts)
                 this->verts = new Vertex[4];
 
+            // if rhs is null, return this without doing anything
             if (NULL == rhs.verts)
                 return * this;
 
             for (int i = 0; i < 4; i++)
                 this->verts[i] = rhs.verts[i];
+
+            findNormal();
+            findDistance();
 
             return * this;
         }
@@ -274,9 +300,19 @@ class Node
                 newNode2->myQuad.setVerts(right);
         }
 
-        bool isFront() // third step
+        bool isFront(Node * splitter) // third step
         {
-            return false;
+            Vertex midpoint = {(this->myQuad[0].x + this->myQuad[1].x) / 2, 
+                               (this->myQuad[0].y + this->myQuad[1].y) / 2, 
+                               (this->myQuad[0].z + this->myQuad[1].z) / 2};
+
+            // this equation is taken from https://www.gamedev.net/forums/topic/106765-determining-if-a-point-is-in-front-of-or-behind-a-plane/
+            double result = (splitter->myQuad.normal.x * midpoint.x) + 
+                            (splitter->myQuad.normal.y * midpoint.y) + 
+                            (splitter->myQuad.normal.z * midpoint.z) + 
+                             splitter->myQuad.distance;
+                            
+            return (result > 0.0);
         }
 
         Node & operator = (const Node & rhs)
@@ -302,7 +338,63 @@ class BSPTree
         Node * root;
 
         // methods
-        Node * buildTree(std::vector< Node *> all);
+        BSPTree() : root(NULL) {}
+        BSPTree(std::vector <Node *> all) : root(NULL)
+        {
+            root = buildTree(all);
+        }
+
+        ~BSPTree()
+        {
+            if (NULL != root)
+                delete root;
+        }
+
+        Node * buildTree(std::vector< Node *> all)
+        {
+            Node * newNode1 = new Node();
+            Node * newNode2 = new Node();
+            Node * current = NULL;
+            std::vector <Node *> back;
+            std::vector <Node *> front;
+            std::vector <Node *>::iterator it;
+
+            // remove current from all
+            current = all.front();
+            all.erase(all.begin());
+
+            // loop through and check current intersects against all
+            for (it = all.begin(); it != all.end();)
+            {
+                if ((*it)->isQuadIntersected(current))
+                {
+                    (*it)->splitQuad(newNode1, newNode2);
+                    all.push_back(newNode1);
+                    all.push_back(newNode2);
+                    it = all.erase(it);
+                }
+                else
+                    it++;
+                
+            }
+
+            // loop through all and partition, setting front and back
+            for (it = all.begin(); it != all.end(); it++)
+            {
+                if ((*it)->isFront(current))
+                    front.push_back(*it);
+                else
+                    back.push_back(*it);
+            }
+
+            // current fromt child vsptree)front)
+            current->frontChild = buildTree(front);
+
+            // current back child bsptree back
+            current->backChild = buildTree(back);
+
+            return current;
+        }
 };
 
 /****************************************************
