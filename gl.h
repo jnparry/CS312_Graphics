@@ -49,6 +49,10 @@ bool isD = false;
 bool isS = false; 
 
 float threshold = 1.0;
+
+double locX;
+double locY;
+bool movement;
 /**********************************************************
  * < END OF GLOBALS >
  *********************************************************/
@@ -92,6 +96,7 @@ bool processUserInputs(bool & running)
 
         if(e.type == SDL_MOUSEMOTION)
         {
+			std::cout << "(" << locX << ", " << locY << ")\n";
             int cur = SDL_ShowCursor(SDL_QUERY);
             if(cur == SDL_DISABLE)
             {
@@ -100,6 +105,12 @@ bool processUserInputs(bool & running)
                 myCam.yaw   -= (mouseX * CAM_INCREMENT);
                 myCam.pitch -= (mouseY * CAM_INCREMENT);
             }
+			else
+			{
+				movement = true;
+				locX = e.motion.x;
+				locY = e.motion.y;
+			}
         }
         if(e.type == SDL_MOUSEBUTTONDOWN)
         {
@@ -111,6 +122,7 @@ bool processUserInputs(bool & running)
             }
             else
             {
+				movement = false;
                 SDL_ShowCursor(SDL_DISABLE);
                 SDL_SetRelativeMouseMode(SDL_TRUE);
             }
@@ -135,22 +147,22 @@ bool processUserInputs(bool & running)
         }
 	}
 
-	if(isA)
+	if(isA) // user moving left, everything moving right
 	{
 		myCam.camX -= (cos((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 		myCam.camZ += (sin((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 	}
-	if(isW)
+	if(isW) // user forward, everything toward screen
 	{
 		myCam.camZ -= (cos((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 		myCam.camX -= (sin((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 	}
-	if(isS)
+	if(isS) // user backward, everything away from screen
 	{
 		myCam.camZ += (cos((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 		myCam.camX += (sin((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 	}
-	if(isD)
+	if(isD) // user right, everything left
 	{
 		myCam.camX += (cos((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
 		myCam.camZ -= (sin((myCam.yaw / 180.0) * M_PI)) * STEP_INCREMENT;
@@ -220,7 +232,6 @@ bool readBMP(const char* fileName, bmpRGB* & data, int & w, int & h)
 	fclose(fp); 
 	return true;
 }
-
 
 bool parseFile(char* ref, string & out)
 {
@@ -339,7 +350,7 @@ bool loadTexture(char * fileName, int & handle)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, (void*)rgbaRef);
-	//glGenerateMipmap(GL_TEXTURE_2D);
+	glGenerateMipmap(GL_TEXTURE_2D);
   	glBindTexture(GL_TEXTURE_2D, 0); // Unbind from current call
 	int err = glGetError();
 	if(err != GL_NO_ERROR)
@@ -353,8 +364,9 @@ bool loadTexture(char * fileName, int & handle)
 	return true;
 }
 
-
-float potRot = 0.0;
+float potRot =  0.0;
+float bunnyX =  0.0;
+float bunnyY = -5.0;
 
 void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 {
@@ -364,17 +376,41 @@ void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 	view = 		glm::rotate(view, 			glm::radians(-myCam.yaw), glm::vec3(0.0, 1.0f, 0.0));
 	view = 		glm::translate(view, 		glm::vec3(-myCam.camX, -myCam.camY, -myCam.camZ));
 	model = glm::mat4(1.0);
+
+	// For the Ceramicified Bunny
+    // model = glm::translate(model, glm::vec3(-5, -5, -10));
+	double xtrans = 0.0;
+	double ytrans = 0.0;
+
+	if (movement)
+	{
+		if (locX / 64 - 4 > bunnyX)
+			bunnyX += 0.01;
+		else if (locX / 64 - 4 < bunnyX)
+			bunnyX -= 0.01;
+
+		if (-locY / 48 + 1.5 > bunnyY)
+			bunnyY += 0.01;
+		else if ( -locY / 48 + 1.5 < bunnyY)
+			bunnyY -= 0.01;
+	}
 	
-    model = glm::translate(model, glm::vec3(0, -5, -10));
+    model = glm::translate(model, glm::vec3(bunnyX, bunnyY, -10));
     model = glm::rotate(model, glm::radians(-potRot), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(40.0));
+
+	// if (moving)
+	// {
+	// 	model = glm::translate(model, glm::vec3(locX, locY, -10));
+	// }
 
 	// For the Magical Pot
 	// model = glm::translate(model, glm::vec3(0, 0, -10));
 	// model = glm::rotate(model, glm::radians(-potRot), glm::vec3(0.0f, 1.0f, 0.0f));
 	// model = glm::scale(model, glm::vec3(3.0));
-	// mvp = proj * view * model;
-	potRot += 0.5;
+
+	// This Rotates our object
+	// potRot += 0.5;
 }
 
 struct vertexData
@@ -602,7 +638,6 @@ bool getObjData(const char* fileName,
 		fclose(fp);
 	}
 	
-	
 	// Resolve indexes for material file 
 	for(int i = 0; i < vertexBuffer.size(); i++)
 	{
@@ -625,7 +660,6 @@ bool getObjData(const char* fileName,
 		}	
 	}
 
-	
 	return true;
 }
 

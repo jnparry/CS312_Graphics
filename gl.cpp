@@ -20,17 +20,63 @@ int main(int argc, char** argv)
 
     bool success = true;
     string vertexShader;
+    string billboardShader;
     string fragmentShader;
 
     int vertexHandle;
+    int billboardHandle;
     int fragmentHandle;
     int programHandle;
+    int imgHandle;
 
     success &= parseFile((char*)"vertex.vs", vertexShader);
+    success &= parseFile((char*)"billboard.vs", billboardShader);
     success &= parseFile((char*)"fragment.fs", fragmentShader);
     success &= compileShader(vertexShader.c_str(), GL_VERTEX_SHADER, vertexHandle);
+    success &= compileShader(billboardShader.c_str(), GL_VERTEX_SHADER, billboardHandle);
     success &= compileShader(fragmentShader.c_str(), GL_FRAGMENT_SHADER, fragmentHandle);
-    success &= compileProgram(vertexHandle, fragmentHandle, programHandle);
+    success &= compileProgram(billboardHandle, fragmentHandle, programHandle);
+    // success &= compileProgram(vertexHandle, fragmentHandle, programHandle);
+    success &= loadTexture("checker.bmp", imgHandle);
+
+    /***************************************************
+     * MULTI-PASS SET UP
+     **************************************************/
+    // Framebuffer - regroups 0, 1, or more textures and
+    // 0 or 1 depth buffers
+    
+    // GLuint FramebufferName = 0;
+    // glGenFramebuffers(1, &FramebufferName);
+    // glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+
+    // // texture we're going to render to
+    // GLuint renderedTexture;
+    // glGenTextures(1, &renderedTexture);
+
+    // // bind texture: all future texture functions will modify this
+    // glBindTexture(GL_TEXTURE_2D, renderedTexture);
+    // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1024, 768, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+
+    // // poor filtering??
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // // depth buffer
+    // GLuint depthrenderbuffer;
+
+    // glGenRenderbuffers(1, &depthrenderbuffer);
+    // glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+    // glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
+    // glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
+
+    // // set 'renderedtexture' as our color attachment #0
+    // glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderedTexture, 0);
+
+    // // set the list of draw buffers
+    // GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    // glDrawBuffers(1, DrawBuffers); // '1' is the size of drawbuffers
+
+    // success &= (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE);
 
     /***************************************************
      * OBJECT LOADER
@@ -112,6 +158,7 @@ int main(int argc, char** argv)
     int uKaHandle  = glGetUniformLocation(programHandle, "u_Ka");
     int uKdHandle  = glGetUniformLocation(programHandle, "u_Kd");
     int uKsHandle  = glGetUniformLocation(programHandle, "u_Ks");
+    int uNsHandle  = glGetUniformLocation(programHandle, "u_Ns");
     int uCamHandle = glGetUniformLocation(programHandle, "u_CamPos");
 
     // MVP matrix
@@ -164,6 +211,7 @@ int main(int argc, char** argv)
             glBindTexture(GL_TEXTURE_2D, textureIDs[0]);
 
             glUniform1i(uTextureHandle, 0);
+            glUniform1i(uNsHandle, materials[0].Ns);
             glUniform1f(uThresholdHandle, threshold);
 
             // Settings up lighting
@@ -182,6 +230,8 @@ int main(int argc, char** argv)
             glUniformMatrix4fv(uProjHandle,  1, false, &proj[0][0]);
 
             glDrawArrays(GL_TRIANGLES, 0, numDraw);
+
+            // const unsigned char* version = glGetString(GL_VERSION);
         }
 
         SDL_GL_SwapWindow(win);
