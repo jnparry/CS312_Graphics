@@ -50,9 +50,9 @@ bool isS = false;
 
 float threshold = 1.0;
 
-double locX;
-double locY;
-bool movement;
+double locX; // mouse position relative to the screen - X
+double locY; // mouse position relative to the screen - Y
+bool movement = false;
 /**********************************************************
  * < END OF GLOBALS >
  *********************************************************/
@@ -61,7 +61,7 @@ bool movement;
 
 // Update state based on keyboard
 float magical = -10.0;
-bool processUserInputs(bool & running)
+bool processUserInputs(bool & running, bool & cylindrical, bool & grow)
 {
 	SDL_Event e;
 	while(SDL_PollEvent(&e)) 
@@ -93,10 +93,30 @@ bool processUserInputs(bool & running)
 			}
 			break;
 		}
+		if(e.type == SDL_KEYDOWN && e.key.keysym.sym == 'c') // trigger cylindrical
+		{
+			if (cylindrical)
+				cylindrical = false;
+			else
+				cylindrical = true;
+		}
+		if(e.type == SDL_KEYDOWN && e.key.keysym.sym == 'm') // trigger bunny follow
+		{
+			if (movement)
+				movement = false;
+			else
+				movement = true;
+		}
+		if(e.type == SDL_KEYDOWN && e.key.keysym.sym == 'g') // trigger growth 
+		{
+			if (grow)
+				grow = false;
+			else
+				grow = true;
+		}
 
         if(e.type == SDL_MOUSEMOTION)
         {
-			std::cout << "(" << locX << ", " << locY << ")\n";
             int cur = SDL_ShowCursor(SDL_QUERY);
             if(cur == SDL_DISABLE)
             {
@@ -107,7 +127,6 @@ bool processUserInputs(bool & running)
             }
 			else
 			{
-				movement = true;
 				locX = e.motion.x;
 				locY = e.motion.y;
 			}
@@ -364,9 +383,9 @@ bool loadTexture(char * fileName, int & handle)
 	return true;
 }
 
-float potRot =  0.0;
-float bunnyX =  0.0;
-float bunnyY = -5.0;
+float  potRot =  0.0;
+double bunnyX =  0.0;
+double bunnyY = -5.0;
 
 void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 {
@@ -376,11 +395,6 @@ void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 	view = 		glm::rotate(view, 			glm::radians(-myCam.yaw), glm::vec3(0.0, 1.0f, 0.0));
 	view = 		glm::translate(view, 		glm::vec3(-myCam.camX, -myCam.camY, -myCam.camZ));
 	model = glm::mat4(1.0);
-
-	// For the Ceramicified Bunny
-    // model = glm::translate(model, glm::vec3(-5, -5, -10));
-	double xtrans = 0.0;
-	double ytrans = 0.0;
 
 	if (movement)
 	{
@@ -395,6 +409,7 @@ void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 			bunnyY -= 0.01;
 	}
 	
+	// For the Ceramicified Bunny	
     model = glm::translate(model, glm::vec3(bunnyX, bunnyY, -10));
     model = glm::rotate(model, glm::radians(-potRot), glm::vec3(0.0f, 1.0f, 0.0f));
     model = glm::scale(model, glm::vec3(40.0));
@@ -411,6 +426,21 @@ void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 
 	// This Rotates our object
 	// potRot += 0.5;
+}
+
+void setupMVPScale(mat4 &model, mat4 &view, mat4 &proj, float scaleValue)
+{
+	proj = glm::perspective(glm::radians(60.0f), SCREEN_W / SCREEN_H, 0.1f, 100.0f);  // Perspective matrix
+	view = glm::mat4(1.0);
+	view = 		glm::rotate(view, 			glm::radians(-myCam.pitch), glm::vec3(1.0f, 0.0f, 0.0f));
+	view = 		glm::rotate(view, 			glm::radians(-myCam.yaw), glm::vec3(0.0, 1.0f, 0.0));
+	view = 		glm::translate(view, 		glm::vec3(-myCam.camX, -myCam.camY, -myCam.camZ));
+	model = glm::mat4(1.0);
+	
+	// For the Ceramicified Bunny	
+    model = glm::translate(model, glm::vec3(5, -5, -10));
+    model = glm::rotate(model, glm::radians(-potRot), glm::vec3(0.0f, 1.0f, 0.0f));
+    model = glm::scale(model, glm::vec3(40.0));
 }
 
 struct vertexData

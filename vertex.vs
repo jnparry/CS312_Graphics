@@ -1,6 +1,7 @@
 uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Proj;
+uniform float scaleVal;
 
 attribute vec3 a_Position;
 attribute vec2 a_UV;

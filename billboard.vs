@@ -2,6 +2,8 @@ uniform mat4 u_Model;
 uniform mat4 u_View;
 uniform mat4 u_Proj;
 uniform vec3 u_CamPos;
+uniform float scaleVal;
+uniform int   cyl;
 
 attribute vec3 a_Position;
 attribute vec2 a_UV;
@@ -13,18 +15,25 @@ varying vec3 FragPos;
 
 void main()
 {
+    int enabled = 0;
+    if (scaleVal != 1.0)
+        enabled = 1;
+
     mat4 u_MV = u_View * u_Model;
-    u_MV[0][0] = 40.0;
+    u_MV[0][0] = 40.0 * scaleVal;
     u_MV[0][1] = 0.0;
     u_MV[0][2] = 0.0;
 
-    u_MV[1][0] = 0.0;
-    u_MV[1][1] = 40.0;
-    u_MV[1][2] = 0.0;
+    u_MV[1][1] = 40.0 * scaleVal;
+    if (cyl == 0)
+    {
+        u_MV[1][0] = 0.0;
+        u_MV[1][2] = 0.0;
+    }
 
     u_MV[2][0] = 0.0;
     u_MV[2][1] = 0.0;
-    u_MV[2][2] = 40.0;
+    u_MV[2][2] = 40.0 * scaleVal;
 
     v_UV = a_UV;
     gl_Position = u_Proj * u_MV * vec4(a_Position, 1.0);
