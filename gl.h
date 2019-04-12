@@ -374,7 +374,7 @@ void setupMVP(mat4 &model, mat4 &view, mat4 &proj)
 	// model = glm::rotate(model, glm::radians(-potRot), glm::vec3(0.0f, 1.0f, 0.0f));
 	// model = glm::scale(model, glm::vec3(3.0));
 	// mvp = proj * view * model;
-	potRot += 0.5;
+	// potRot += 0.5;
 }
 
 struct vertexData
